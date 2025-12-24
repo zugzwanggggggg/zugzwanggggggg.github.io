@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSCP+ Review | Chuan Qian</title>
+    <link rel="stylesheet" href="../styles.css">
+    <script src="../src/script.js"></script>
+
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="profile-container">
+            <img src="../assets/linkedin.jpg" class="profile-pic">
+            
+            <h1 class="profile-name">Chuan Qian</h1>
+            <span class="profile-title">*-*</span>
+
+            <ul class="nav-menu">
+                <li><a href="../index.html">ABOUT ME</a></li>
+                <li><a href="../resume.html">RESUME</a></li>
+                <li><a href="../awards.html">AWARDS</a></li>
+                <li><a href="../activities.html">ACTIVITIES</a></li>
+                <li><a href="../certifications.html" class="active">CERTIFICATIONS</a></li>
+            </ul>
+
+            <div class="social-icons">
+                <a href="https://www.linkedin.com/in/chuan-qian-t-129147273/" target="_blank">
+                    <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" alt="LinkedIn">
+                </a>
+                <a href="https://github.com/zugzwanggggggg" target="_blank">
+                    <img src="https://cdn-icons-png.flaticon.com/512/25/25231.png" alt="GitHub">
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <a href="../certifications.html" style="color: #888; font-size: 0.9rem; margin-bottom: 20px; display: inline-block;">&larr; Back to Certifications</a>
+        
+        <h1>OSCP Review</h1>
+        <p><strong>TLDR;</strong> My OSCP journey began in mid-August 2024. I was unable to compromise any Active Directory (AD) Machines on my first try. To prepare for my second attempt, I played with Hack the Box boxes. On my second attempt, I successfully passed the OSCP+.</p>
+
+        <div class="image-placeholder" style="height: auto; padding: 10px; border: none; background: transparent;">
+            <img src="../assets/oscp plus.png" alt="OSCP Plus Certificate" style="max-width: 100%; border: 1px solid #ddd;">
+        </div>
+
+        <p>As of 16 March 2025, I've successfully completed the OSCP.</p>
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="https://credentials.offsec.com/8122c9d6-b93d-47de-b70e-619b2eee9224" target="_blank" class="btn">VIEW CREDENTIAL</a>
+        </div>
+
+        <br>
+        <h2>Kicking It Off</h2>
+        <p>I was first offered an opportunity to take up this cert (fully sponsored) due to my consistent efforts in WorldSkills training. At that time, I was still a noob at hacking, with only experience from a ethical hacking module in school. Everyone was also talking about how important the cert was as a HR filter when applying to jobs. So ultimately, I took it up during my 2-month vacation.</p>
+
+        <h2>Completing the Modules</h2>
+        <p>The course had a total of 27 modules ranging from the fundamentals like report writing, all the way to attacking AD environments. It also included modules that weren't tested, such as attacks on AWS Cloud Infrastructure.</p>
+        <p>Since I did have some experience in the basics (e.g. Nmap familiarity, simple web exploitations), I was able to complete some modules quite quickly. On the other hand, the AD modules took me a day each as I was unfamiliar with the content and wanted to spend more time understanding the concepts.</p>
+        <p>Overall, it took half a month (excluding weekends) for me to complete all the modules. Over the next month, I started on the Challenge Labs, as well as a few Proving Grounds boxes.</p>
+
+        <h2>The Exam (First Attempt)</h2>
+        <p>While waiting for the proctor to enter the session, I was very nervous as it was my first time. Once the time started, I began running nmap scans and screenshotting every output. Around 2 hours of enumerating, I couldn't get a single machine yet, so I took a quick break before continuing on.</p>
+        <p>By the next day at 2pm, I managed to get 60 points; 2 full standalones and 1 initial access on a standalone. That's right. Not a single AD machine. I failed my first attempt.</p>
+
+        <h2>Second Attempt</h2>
+        <p>I took a break as I had to go back to school. By then, the exam format has changed a little. Since I had also qualified to represent my school in the WorldSkills Singapore 2025 Cybersecurity trade, my trainers provided me with a Hack the Box VIP+ subscription to support my training.</p>
+        <p>Moments before my exam began, I browsed through other people's reviews. I played some classical music (as suggested by a blog) and suddenly realised that the AD set was an assume-breach. OH. MY. GOD. I spent 2 whole hours doing nothing on my first try because I missed this detail.</p>
+        <p>I quickly accessed the machine, pivoted and compromised the entire set in 2 hours. A few days later, I received an email with the result that I passed! (Yay)</p>
+
+        <h2>Tips</h2>
+        <ul>
+            <li>Get familiar with the structure of the exam</li>
+            <li>Stay calm</li>
+            <li>DO NOT end your exam without checking that you have all your screenshots</li>
+            <li>Play some classical music when you're stuck :)</li>
+        </ul>
+    </div>
+
+</body>
+</html>

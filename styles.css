@@ -1,0 +1,306 @@
+/* GLOBAL RESET */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    color: #333;
+    line-height: 1.6;
+    display: flex;
+    min-height: 100vh;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+    transition: color 0.2s ease;
+}
+
+/* SIDEBAR (Left - 40%) */
+.sidebar {
+    width: 40%;
+    background-color: #f2f2f2; /* Light Concrete Grey */
+    padding: 60px;
+    position: fixed;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Center content vertically */
+    border-right: 1px solid #e0e0e0;
+}
+
+.profile-container {
+    max-width: 400px;
+    margin: 0 auto;
+    text-align: left; /* Aligns text like the template */
+}
+
+/* Profile Picture */
+.profile-pic {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    background-color: #ddd; /* Placeholder color */
+    margin-bottom: 30px;
+    display: block;
+}
+
+.profile-name {
+    font-size: 2.5rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 5px;
+    color: #000;
+}
+
+.profile-title {
+    font-size: 1.2rem;
+    color: #666;
+    letter-spacing: 2px;
+    margin-bottom: 40px;
+    text-transform: uppercase;
+    display: block;
+    font-weight: 300;
+}
+
+/* Navigation */
+.nav-menu {
+    list-style: none;
+    margin-bottom: 40px;
+}
+
+.nav-menu li {
+    margin-bottom: 12px;
+}
+
+.nav-menu a {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.nav-menu a:hover, .nav-menu a.active {
+    color: #000;
+    border-bottom: 2px solid #000;
+    padding-bottom: 2px;
+}
+
+/* Social Icons */
+.social-icons {
+    display: flex;
+    gap: 20px;
+}
+
+.social-icons img {
+    width: 24px;
+    height: 24px;
+    opacity: 0.6;
+    transition: opacity 0.3s;
+}
+
+.social-icons img:hover {
+    opacity: 1;
+}
+
+/* MAIN CONTENT (Right - 60%) */
+.main-content {
+    margin-left: 40%; /* Matches sidebar width */
+    width: 60%;
+    padding: 80px 100px;
+    background-color: #fff;
+    min-height: 100vh;
+}
+
+/* Content Typography */
+.main-content h1 {
+    font-size: 3rem;
+    font-weight: 800;
+    margin-bottom: 30px;
+    line-height: 1.1;
+}
+
+.main-content h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-top: 50px;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 4px solid #f2f2f2;
+    display: inline-block;
+}
+
+.main-content h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.main-content p {
+    font-size: 1.05rem;
+    color: #444;
+    margin-bottom: 25px;
+    max-width: 700px;
+}
+
+.main-content ul {
+    list-style: none;
+    margin-bottom: 20px;
+}
+
+.main-content ul li {
+    margin-bottom: 10px;
+    padding-left: 15px;
+    border-left: 3px solid #ddd;
+}
+
+/* Buttons */
+.btn-group {
+    margin: 30px 0;
+}
+
+.btn {
+    display: inline-block;
+    padding: 12px 30px;
+    background-color: #000;
+    color: #fff;
+    font-weight: bold;
+    font-size: 0.9rem;
+    margin-right: 15px;
+    border-radius: 30px; /* Rounded buttons */
+}
+
+.btn:hover {
+    background-color: #444;
+}
+
+.date {
+    font-size: 0.9rem;
+    color: #888;
+    font-weight: 600;
+    margin-bottom: 5px;
+    display: block;
+}
+
+/* MOBILE RESPONSIVE */
+@media (max-width: 900px) {
+    body {
+        flex-direction: column;
+    }
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        padding: 40px 20px;
+        text-align: center;
+    }
+    .profile-container {
+        text-align: center;
+    }
+    .profile-pic {
+        margin: 0 auto 20px auto;
+    }
+    .social-icons {
+        justify-content: center;
+    }
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+        padding: 40px 20px;
+    }
+}
+
+/* --- CARD GRID STYLES --- */
+
+.cert-grid {
+    display: grid;
+    /* Creates columns that are at least 300px wide, fitting as many as possible */
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin-top: 40px;
+}
+
+.cert-card {
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+    padding: 30px;
+    display: flex;
+    flex-direction: column; /* Stacks content vertically */
+    transition: all 0.3s ease;
+    height: 100%; /* Makes all cards same height */
+}
+
+/* Hover Effect: Card lifts up slightly and gets a shadow */
+.cert-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    border-color: #000;
+}
+
+.cert-card h3 {
+    margin-top: 0;
+    font-size: 1.4rem;
+    margin-bottom: 5px;
+}
+
+.issuer {
+    font-size: 0.9rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+    display: block;
+    font-weight: 700;
+}
+
+.cert-card p {
+    font-size: 0.95rem;
+    flex-grow: 1; /* Pushes the button to the bottom */
+    margin-bottom: 30px;
+    line-height: 1.6;
+}
+
+/* Make the button stretch full width in the card */
+.cert-card .btn {
+    text-align: center;
+    margin-right: 0;
+    display: block;
+}
+/* --- DISABLED BUTTON STYLE --- */
+.btn.disabled {
+    background-color: #f0f0f0; /* Light grey background */
+    color: #aaa;              /* Grey text */
+    border-color: #f0f0f0;    /* Grey border */
+    cursor: not-allowed;      /* Shows 'no' symbol on hover */
+    pointer-events: none;     /* Prevents clicking */
+}
+
+
+/* --- ANIMATION STYLES --- */
+
+/* 1. Initial State: Hidden and slightly pushed down */
+.main-content {
+    opacity: 0; /* Starts hidden */
+    transform: translateY(30px);
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.main-content.visible {
+    opacity: 1; /* Fades in */
+    transform: translateY(0);
+}
+
+/* OPTIONAL: Sidebar fade in slightly faster */
+.sidebar {
+    opacity: 1;
+    transition: opacity 1s ease;
+}
+
+.sidebar.visible {
+    opacity: 1;
+}
