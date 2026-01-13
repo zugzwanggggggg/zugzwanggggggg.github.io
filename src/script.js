@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     if (localStorage.getItem('theme') === 'light') {
         body.classList.add('light-mode');
-        if(toggleBtn) toggleBtn.textContent = "🌙 Dark Mode";
+        if(toggleBtn) toggleBtn.textContent = "Dark Mode";
     }
 
     if(toggleBtn) {
@@ -20,10 +20,10 @@ document.addEventListener("DOMContentLoaded", function() {
             
             if (body.classList.contains('light-mode')) {
                 localStorage.setItem('theme', 'light');
-                toggleBtn.textContent = "🌙 Dark Mode";
+                toggleBtn.textContent = "Dark Mode";
             } else {
                 localStorage.setItem('theme', 'dark');
-                toggleBtn.textContent = "☀️ Light Mode";
+                toggleBtn.textContent = "Light Mode";
             }
         });
     }
