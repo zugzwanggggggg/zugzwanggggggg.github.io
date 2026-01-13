@@ -1,12 +1,23 @@
+/* GLOBAL RESET */
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
 }
 
+/* Color Variables for easy updates */
+:root {
+    --bg-darkest: #222831;   /* Sidebar & Cards */
+    --bg-dark: #393E46;      /* Main Background */
+    --accent: #FFD369;       /* Gold (Buttons/Links) */
+    --text-main: #EEEEEE;    /* White Text */
+    --text-muted: #B0B0B0;   /* Grey Text */
+}
+
 body {
     font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
-    color: #333;
+    color: var(--text-main);
+    background-color: var(--bg-dark); /* Dark Grey Background */
     line-height: 1.6;
     display: flex;
     min-height: 100vh;
@@ -15,19 +26,21 @@ body {
 a {
     text-decoration: none;
     color: inherit;
-    transition: color 0.2s ease;
+    transition: all 0.2s ease;
 }
 
+/* --- SIDEBAR (Left - 30%) --- */
 .sidebar {
-    width: 40%;
-    background-color: #f2f2f2; 
+    width: 30%; /* CHANGED: Smaller width */
+    background-color: var(--bg-darkest); /* Darkest Grey */
     padding: 60px;
     position: fixed;
     height: 100vh;
     display: flex;
     flex-direction: column;
-    justify-content: center; 
-    border-right: 1px solid #e0e0e0;
+    justify-content: center;
+    border-right: 1px solid #444; /* Dark border */
+    z-index: 10;
 }
 
 .profile-container {
@@ -41,7 +54,8 @@ a {
     height: 150px;
     border-radius: 50%;
     object-fit: cover;
-    background-color: #ddd;
+    background-color: #444;
+    border: 3px solid var(--accent); /* Gold border pop */
     margin-bottom: 30px;
     display: block;
 }
@@ -51,12 +65,12 @@ a {
     font-weight: 800;
     letter-spacing: -1px;
     margin-bottom: 5px;
-    color: #000;
+    color: var(--accent); /* Gold Name */
 }
 
 .profile-title {
     font-size: 1.2rem;
-    color: #666;
+    color: var(--text-main);
     letter-spacing: 2px;
     margin-bottom: 40px;
     text-transform: uppercase;
@@ -64,6 +78,7 @@ a {
     font-weight: 300;
 }
 
+/* Navigation */
 .nav-menu {
     list-style: none;
     margin-bottom: 40px;
@@ -76,17 +91,18 @@ a {
 .nav-menu a {
     font-size: 1rem;
     font-weight: 600;
-    color: #888;
+    color: var(--text-muted); /* Muted text */
     text-transform: uppercase;
     letter-spacing: 1px;
 }
 
 .nav-menu a:hover, .nav-menu a.active {
-    color: #000;
-    border-bottom: 2px solid #000;
+    color: var(--accent); /* Gold on hover */
+    border-bottom: 2px solid var(--accent);
     padding-bottom: 2px;
 }
 
+/* Social Icons */
 .social-icons {
     display: flex;
     gap: 20px;
@@ -97,25 +113,29 @@ a {
     height: 24px;
     opacity: 0.6;
     transition: opacity 0.3s;
+    filter: invert(1); /* Inverts black icons to white for dark mode */
 }
 
 .social-icons img:hover {
     opacity: 1;
 }
 
+/* --- MAIN CONTENT (Right - 70%) --- */
 .main-content {
-    margin-left: 40%; 
-    width: 60%;
+    margin-left: 30%; /* CHANGED: Matches sidebar width */
+    width: 70%;       /* CHANGED: Wider content area */
     padding: 80px 100px;
-    background-color: #fff;
+    background-color: var(--bg-dark); /* Dark Grey */
     min-height: 100vh;
 }
 
+/* Content Typography */
 .main-content h1 {
     font-size: 3rem;
     font-weight: 800;
     margin-bottom: 30px;
     line-height: 1.1;
+    color: var(--accent); /* Gold Headings */
 }
 
 .main-content h2 {
@@ -124,21 +144,23 @@ a {
     margin-top: 50px;
     margin-bottom: 20px;
     padding-bottom: 10px;
-    border-bottom: 4px solid #f2f2f2;
+    border-bottom: 4px solid var(--bg-darkest);
     display: inline-block;
+    color: var(--text-main);
 }
 
 .main-content h3 {
     font-size: 1.2rem;
     font-weight: 600;
     margin-bottom: 5px;
+    color: var(--accent);
 }
 
 .main-content p {
     font-size: 1.05rem;
-    color: #444;
+    color: var(--text-main);
     margin-bottom: 25px;
-    max-width: 700px;
+    max-width: 800px;
 }
 
 .main-content ul {
@@ -149,9 +171,11 @@ a {
 .main-content ul li {
     margin-bottom: 10px;
     padding-left: 15px;
-    border-left: 3px solid #ddd;
+    border-left: 3px solid var(--accent); /* Gold accent line */
+    color: var(--text-main);
 }
 
+/* Buttons */
 .btn-group {
     margin: 30px 0;
 }
@@ -159,26 +183,108 @@ a {
 .btn {
     display: inline-block;
     padding: 12px 30px;
-    background-color: #000;
-    color: #fff;
+    background-color: var(--accent); /* Gold Button */
+    color: var(--bg-darkest);        /* Dark Text */
     font-weight: bold;
     font-size: 0.9rem;
     margin-right: 15px;
     border-radius: 30px; 
+    border: 2px solid var(--accent);
 }
 
 .btn:hover {
-    background-color: #444;
+    background-color: transparent;
+    color: var(--accent); /* Outline effect on hover */
+}
+
+.btn.disabled {
+    background-color: #444; 
+    color: #888; 
+    border-color: #444;
+    cursor: not-allowed;   
+    pointer-events: none;  
 }
 
 .date {
     font-size: 0.9rem;
-    color: #888;
+    color: var(--text-muted);
     font-weight: 600;
     margin-bottom: 5px;
     display: block;
 }
 
+/* --- CARDS (Dark Theme) --- */
+.cert-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin-top: 40px;
+}
+
+.cert-card {
+    background-color: var(--bg-darkest); /* Darkest Grey Card */
+    border: 1px solid #444;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+    height: 100%; 
+}
+
+.cert-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--accent); /* Gold border on hover */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.cert-card h3 {
+    margin-top: 0;
+    font-size: 1.4rem;
+    margin-bottom: 5px;
+    color: var(--accent);
+}
+
+.issuer {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+    display: block;
+    font-weight: 700;
+}
+
+.cert-card p {
+    font-size: 0.95rem;
+    color: var(--text-main);
+    flex-grow: 1;
+    margin-bottom: 30px;
+    line-height: 1.6;
+}
+
+.cert-card .btn {
+    text-align: center;
+    margin-right: 0;
+    display: block;
+}
+
+/* --- ANIMATION --- */
+.main-content {
+    opacity: 0; 
+    transform: translateY(30px);
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.main-content.visible {
+    opacity: 1; 
+    transform: translateY(0);
+}
+
+.sidebar {
+    opacity: 1;
+}
+
+/* --- MOBILE RESPONSIVE --- */
 @media (max-width: 900px) {
     body {
         flex-direction: column;
@@ -189,6 +295,8 @@ a {
         position: relative;
         padding: 40px 20px;
         text-align: center;
+        border-right: none;
+        border-bottom: 1px solid #444;
     }
     .profile-container {
         text-align: center;
@@ -204,87 +312,4 @@ a {
         width: 100%;
         padding: 40px 20px;
     }
-}
-
-
-.cert-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 30px;
-    margin-top: 40px;
-}
-
-.cert-card {
-    background-color: #fff;
-    border: 1px solid #e0e0e0;
-    padding: 30px;
-    display: flex;
-    flex-direction: column;
-    transition: all 0.3s ease;
-    height: 100%; 
-}
-
-.cert-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-    border-color: #000;
-}
-
-.cert-card h3 {
-    margin-top: 0;
-    font-size: 1.4rem;
-    margin-bottom: 5px;
-}
-
-.issuer {
-    font-size: 0.9rem;
-    color: #888;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 20px;
-    display: block;
-    font-weight: 700;
-}
-
-.cert-card p {
-    font-size: 0.95rem;
-    flex-grow: 1;
-    margin-bottom: 30px;
-    line-height: 1.6;
-}
-
-.cert-card .btn {
-    text-align: center;
-    margin-right: 0;
-    display: block;
-}
-
-.btn.disabled {
-    background-color: #f0f0f0; 
-    color: #aaa; 
-    border-color: #f0f0f0;
-    cursor: not-allowed;   
-    pointer-events: none;  
-}
-
-
-
-.main-content {
-    opacity: 0; 
-    transform: translateY(30px);
-    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
-}
-
-.main-content.visible {
-    opacity: 1; 
-    transform: translateY(0);
-}
-
-.sidebar {
-    opacity: 1;
-    transition: opacity 1s ease;
-}
-
-.sidebar.visible {
-    opacity: 1;
 }
