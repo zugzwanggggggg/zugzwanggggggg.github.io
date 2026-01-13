@@ -1,36 +1,32 @@
-/* GLOBAL VARIABLES (Default = DARK MODE) */
 :root {
-    /* DARK PALETTE: #222831, #393E46, #FFD369, #EEEEEE */
-    --bg-main: #393E46;      /* Dark Grey Background */
-    --bg-sidebar: #222831;   /* Darkest Grey Sidebar */
-    --text-primary: #EEEEEE; /* White Text */
-    --text-secondary: #B0B0B0; /* Muted Grey Text */
-    --text-heading: #FFD369; /* Gold Headings */
+    --bg-main: #393E46; 
+    --bg-sidebar: #222831;  
+    --text-primary: #EEEEEE; 
+    --text-secondary: #B0B0B0;
+    --text-heading: #FFD369; 
     --border-color: #444;
-    --accent: #FFD369;       /* Gold Buttons/Links */
-    --accent-text: #222831;  /* Dark Text on Gold Button */
+    --accent: #FFD369;  
+    --accent-text: #222831; 
     --card-bg: #222831;
     --card-hover-border: #FFD369;
-    --icon-filter: invert(1); /* Makes black icons white */
+    --icon-filter: invert(1); 
 }
 
-/* LIGHT MODE OVERRIDES (Triggered by .light-mode class) */
+
 body.light-mode {
-    /* ORIGINAL CONCRETE PALETTE */
-    --bg-main: #fff;         /* Pure White */
-    --bg-sidebar: #f2f2f2;   /* Light Grey Sidebar */
-    --text-primary: #333;    /* Dark Grey Text */
-    --text-secondary: #666;  /* Medium Grey Text */
-    --text-heading: #000;    /* Black Headings */
+    --bg-main: #fff;         
+    --bg-sidebar: #f2f2f2; 
+    --text-primary: #333;
+    --text-secondary: #666; 
+    --text-heading: #000; 
     --border-color: #e0e0e0;
-    --accent: #000;          /* Black Buttons */
-    --accent-text: #fff;     /* White Text on Black Button */
+    --accent: #000; 
+    --accent-text: #fff;
     --card-bg: #fff;
     --card-hover-border: #000;
-    --icon-filter: none;     /* Standard black icons */
+    --icon-filter: none;
 }
 
-/* GLOBAL RESET */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -53,7 +49,6 @@ a {
     transition: color 0.2s ease;
 }
 
-/* --- SIDEBAR (Left - 30%) --- */
 .sidebar {
     width: 30%;
     background-color: var(--bg-sidebar);
@@ -102,7 +97,6 @@ a {
     font-weight: 300;
 }
 
-/* Navigation */
 .nav-menu {
     list-style: none;
     margin-bottom: 40px;
@@ -126,7 +120,6 @@ a {
     padding-bottom: 2px;
 }
 
-/* Social Icons */
 .social-icons {
     display: flex;
     gap: 20px;
@@ -145,7 +138,6 @@ a {
     opacity: 1;
 }
 
-/* THEME TOGGLE BUTTON */
 .theme-btn {
     background: transparent;
     border: 2px solid var(--text-secondary);
@@ -164,7 +156,6 @@ a {
     color: var(--accent);
 }
 
-/* --- MAIN CONTENT (Right - 70%) --- */
 .main-content {
     margin-left: 30%;
     width: 70%;
