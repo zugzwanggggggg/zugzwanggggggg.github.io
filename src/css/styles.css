@@ -1,6 +1,6 @@
 /* GLOBAL VARIABLES (Default = DARK MODE) */
 :root {
-    /* Palette: #222831, #393E46, #FFD369, #EEEEEE */
+    /* DARK PALETTE: #222831, #393E46, #FFD369, #EEEEEE */
     --bg-main: #393E46;      /* Dark Grey Background */
     --bg-sidebar: #222831;   /* Darkest Grey Sidebar */
     --text-primary: #EEEEEE; /* White Text */
@@ -16,17 +16,17 @@
 
 /* LIGHT MODE OVERRIDES (Triggered by .light-mode class) */
 body.light-mode {
-    /* Palette: #FAF7F0, #D8D2C2, #B17457, #4A4947 */
-    --bg-main: #FAF7F0;      /* Cream Background */
-    --bg-sidebar: #D8D2C2;   /* Beige Sidebar */
-    --text-primary: #4A4947; /* Dark Grey Text */
-    --text-secondary: #666;  
-    --text-heading: #4A4947; /* Dark Headings */
-    --border-color: #C0B9A8;
-    --accent: #B17457;       /* Terra Cotta Buttons */
-    --accent-text: #fff;     /* White Text on Terra Cotta Button */
+    /* ORIGINAL CONCRETE PALETTE */
+    --bg-main: #fff;         /* Pure White */
+    --bg-sidebar: #f2f2f2;   /* Light Grey Sidebar */
+    --text-primary: #333;    /* Dark Grey Text */
+    --text-secondary: #666;  /* Medium Grey Text */
+    --text-heading: #000;    /* Black Headings */
+    --border-color: #e0e0e0;
+    --accent: #000;          /* Black Buttons */
+    --accent-text: #fff;     /* White Text on Black Button */
     --card-bg: #fff;
-    --card-hover-border: #B17457;
+    --card-hover-border: #000;
     --icon-filter: none;     /* Standard black icons */
 }
 
@@ -138,7 +138,7 @@ a {
     height: 24px;
     opacity: 0.6;
     transition: opacity 0.3s;
-    filter: var(--icon-filter); /* Handles white/black swap automatically */
+    filter: var(--icon-filter);
 }
 
 .social-icons img:hover {
@@ -218,7 +218,6 @@ a {
     border-left: 3px solid var(--accent);
 }
 
-/* Buttons */
 .btn-group {
     margin: 30px 0;
 }
@@ -256,7 +255,6 @@ a {
     display: block;
 }
 
-/* --- CARDS --- */
 .cert-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -310,7 +308,6 @@ a {
     display: block;
 }
 
-/* --- ANIMATION --- */
 .main-content {
     opacity: 0; 
     transform: translateY(30px);
@@ -326,7 +323,6 @@ a {
     opacity: 1;
 }
 
-/* --- MOBILE RESPONSIVE --- */
 @media (max-width: 900px) {
     body {
         flex-direction: column;

@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", function() {
-    // 1. Page Load Animation
     const mainContent = document.querySelector('.main-content');
     setTimeout(() => {
         if(mainContent) {
@@ -7,17 +6,14 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }, 100);
 
-    // 2. Theme Logic (Default is DARK)
     const toggleBtn = document.getElementById('theme-toggle');
     const body = document.body;
 
-    // Check if user previously selected LIGHT mode
     if (localStorage.getItem('theme') === 'light') {
         body.classList.add('light-mode');
         if(toggleBtn) toggleBtn.textContent = "🌙 Dark Mode";
     }
 
-    // Toggle on click
     if(toggleBtn) {
         toggleBtn.addEventListener('click', () => {
             body.classList.toggle('light-mode');
@@ -26,7 +22,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 localStorage.setItem('theme', 'light');
                 toggleBtn.textContent = "🌙 Dark Mode";
             } else {
-                localStorage.setItem('theme', 'dark'); // Actually removes class, reverting to default
+                localStorage.setItem('theme', 'dark');
                 toggleBtn.textContent = "☀️ Light Mode";
             }
         });
