@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Risk Calculator - Mobile Ready</title>
+    <style>
+        /* RESET & VARIABLES */
+        :root {
+            --bg-body: #111827;
+            --bg-card: #1f2937;
+            --text-main: #f9fafb;
+            --text-dim: #9ca3af;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-blue: #3b82f6;
+            --border: #374151;
+            --tooltip-bg: #000000;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align top on mobile */
+            min-height: 100vh;
+            margin: 0;
+            padding: 15px;
+        }
+
+        /* CARD STYLING */
+        .calculator {
+            background-color: var(--bg-card);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            width: 100%;
+            max-width: 420px;
+            border: 1px solid var(--border);
+            margin-top: 10px; /* Space from top on mobile */
+        }
+
+        h2 {
+            margin: 0 0 20px 0;
+            font-size: 1.3rem;
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+
+        /* FORM GRID */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .full-width { grid-column: span 2; }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        
+        .label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            color: var(--text-dim);
+            margin: 0;
+        }
+
+        /* INPUTS - 16px prevents iOS Zoom */
+        input, select {
+            width: 100%;
+            background-color: var(--bg-body);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 14px; /* Larger touch target */
+            border-radius: 8px;
+            font-size: 16px; /* CRITICAL FOR MOBILE */
+            outline: none;
+            transition: border-color 0.2s;
+            appearance: none; /* Removes default iOS styling */
+        }
+
+        input:focus, select:focus {
+            border-color: var(--accent-blue);
+        }
+
+        /* TOOLTIPS */
+        .tooltip-container { position: relative; display: inline-block; padding: 5px; margin: -5px; /* Increase touch area */ }
+        .tooltip-icon {
+            background: var(--border);
+            color: var(--text-dim);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        
+        /* Mobile friendly tooltip: Toggle on click instead of hover */
+        .tooltip-box {
+            display: none; /* Hidden by default */
+            position: absolute;
+            bottom: 150%;
+            right: -10px;
+            background-color: var(--tooltip-bg);
+            color: #fff;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            border: 1px solid var(--border);
+            z-index: 100;
+            text-align: right;
+        }
+        .tooltip-container.active .tooltip-box { display: block; }
+        .rule-row { display: block; margin-bottom: 2px; }
+        .rule-highlight { color: var(--accent-green); font-weight: bold; }
+        .rule-danger { color: var(--accent-red); font-weight: bold; }
+
+        /* DIRECTION BUTTONS */
+        .toggle-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .dir-btn {
+            width: 100%;
+            padding: 16px; /* Fat finger friendly */
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 1rem;
+            background-color: var(--bg-body);
+            color: var(--text-dim);
+            transition: all 0.2s;
+        }
+
+        .dir-btn.buy.active { background-color: var(--accent-green); color: white; border-color: var(--accent-green); }
+        .dir-btn.sell.active { background-color: var(--accent-red); color: white; border-color: var(--accent-red); }
+
+        /* RESULTS AREA */
+        .results-area {
+            border-top: 2px solid var(--border);
+            padding-top: 20px;
+            margin-top: 10px;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-body);
+            padding: 18px; /* Larger touch target */
+            border-radius: 10px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            transition: transform 0.1s, border-color 0.2s;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .result-row:active { transform: scale(0.96); background-color: #2d3748; }
+
+        .res-info { display: flex; flex-direction: column; }
+
+        .res-label {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .res-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            font-family: monospace; /* Cleaner numbers */
+        }
+        
+        .val-sl { color: var(--accent-red); }
+        .val-tp { color: var(--accent-green); }
+
+        .copy-status {
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: var(--accent-blue);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .copy-status.visible { opacity: 1; }
+
+    </style>
+</head>
+<body>
+
+<div class="calculator">
+    <h2>FK Position Calc ($)</h2>
+
+    <div class="form-grid">
+        <div class="input-group full-width">
+            <label>Lot Size (Volume)</label>
+            <input type="number" id="lotSize" value="1.00" step="0.01" inputmode="decimal">
+        </div>
+
+        <div class="input-group full-width">
+            <label>Currency Pair</label>
+            <select id="pairSelect">
+                <option value="EURUSD">EUR/USD</option>
+                <option value="GBPUSD">GBP/USD</option>
+                <option value="AUDUSD">AUD/USD</option>
+                <option value="NZDUSD">NZD/USD</option>
+                <option value="USDJPY">USD/JPY</option>
+                <option value="USDCAD">USD/CAD</option>
+                <option value="USDCHF">USD/CHF</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <div class="label-row">
+                <label>SL Risk ($)</label>
+                <div class="tooltip-container" onclick="toggleTooltip(this)">
+                    <div class="tooltip-icon">?</div>
+                    <div class="tooltip-box">
+                        <span class="rule-row">16 lots: <span class="rule-danger">&le; 2k</span></span>
+                        <span class="rule-row">8 lots: <span class="rule-danger">&le; 1k</span></span>
+                    </div>
+                </div>
+            </div>
+            <input type="number" id="riskAmount" placeholder="$$$" inputmode="numeric">
+        </div>
+
+        <div class="input-group">
+            <div class="label-row">
+                <label>TP Reward ($)</label>
+                <div class="tooltip-container" onclick="toggleTooltip(this)">
+                    <div class="tooltip-icon">?</div>
+                    <div class="tooltip-box">
+                        <span class="rule-row">16 lots: <span class="rule-highlight">&ge; 10k</span></span>
+                        <span class="rule-row">8 lots: <span class="rule-highlight">&ge; 5k</span></span>
+                    </div>
+                </div>
+            </div>
+            <input type="number" id="rewardAmount" placeholder="$$$" inputmode="numeric">
+        </div>
+    </div>
+
+    <div class="toggle-container">
+        <button class="dir-btn buy active" onclick="setDirection(1)">LONG (Buy)</button>
+        <button class="dir-btn sell" onclick="setDirection(-1)">SHORT (Sell)</button>
+    </div>
+
+    <div class="input-group" style="margin-bottom: 20px;">
+        <label>Open Price</label>
+        <input type="number" id="openPrice" placeholder="Enter filled price..." step="0.00001" inputmode="decimal">
+    </div>
+
+    <div class="results-area">
+        <div class="result-row" onclick="handleCopy('slResult', 'slStatus')">
+            <div class="res-info">
+                <div class="res-label">STOP LOSS</div>
+                <div class="res-value val-sl" id="slResult">---</div>
+            </div>
+            <span class="copy-status" id="slStatus">COPIED!</span>
+        </div>
+
+        <div class="result-row" onclick="handleCopy('tpResult', 'tpStatus')">
+            <div class="res-info">
+                <div class="res-label">TAKE PROFIT</div>
+                <div class="res-value val-tp" id="tpResult">---</div>
+            </div>
+            <span class="copy-status" id="tpStatus">COPIED!</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    // State
+    let direction = 1; // 1 for Buy, -1 for Sell
+
+    // DOM Elements
+    const inputs = document.querySelectorAll('input, select');
+    const elSl = document.getElementById('slResult');
+    const elTp = document.getElementById('tpResult');
+    const elPair = document.getElementById('pairSelect');
+    const elLot = document.getElementById('lotSize');
+
+    // Load saved settings
+    if(localStorage.getItem('fk_last_lot')) elLot.value = localStorage.getItem('fk_last_lot');
+    if(localStorage.getItem('fk_last_pair')) elPair.value = localStorage.getItem('fk_last_pair');
+
+    // Listeners
+    inputs.forEach(input => input.addEventListener('input', calculate));
+    elPair.addEventListener('change', () => {
+        localStorage.setItem('fk_last_pair', elPair.value);
+        calculate();
+    });
+    elLot.addEventListener('change', () => {
+        localStorage.setItem('fk_last_lot', elLot.value);
+        calculate();
+    });
+
+    // Toggle Tooltip on Mobile Tap
+    function toggleTooltip(el) {
+        // Close others
+        document.querySelectorAll('.tooltip-container').forEach(c => {
+            if(c !== el) c.classList.remove('active');
+        });
+        el.classList.toggle('active');
+        
+        // Auto hide after 3 seconds
+        if(el.classList.contains('active')) {
+            setTimeout(() => el.classList.remove('active'), 3000);
+        }
+    }
+
+    function setDirection(dir) {
+        direction = dir;
+        const btns = document.querySelectorAll('.dir-btn');
+        btns[0].classList.toggle('active', dir === 1);
+        btns[1].classList.toggle('active', dir === -1);
+        calculate();
+    }
+
+    function calculate() {
+        const lots = parseFloat(document.getElementById('lotSize').value);
+        const risk = parseFloat(document.getElementById('riskAmount').value);
+        const reward = parseFloat(document.getElementById('rewardAmount').value);
+        const open = parseFloat(document.getElementById('openPrice').value);
+        const pair = document.getElementById('pairSelect').value;
+
+        if (!lots || !risk || !reward || !open) {
+            elSl.innerText = "---";
+            elTp.innerText = "---";
+            return;
+        }
+
+        let priceChangeSL = 0;
+        let priceChangeTP = 0;
+        const quoteIsUSD = ['EURUSD','GBPUSD','AUDUSD','NZDUSD'].includes(pair);
+        
+        if (quoteIsUSD) {
+            priceChangeSL = risk / (lots * 100000);
+            priceChangeTP = reward / (lots * 100000);
+        } else {
+            priceChangeSL = (risk * open) / (lots * 100000);
+            priceChangeTP = (reward * open) / (lots * 100000);
+        }
+
+        let slPrice, tpPrice;
+        let decimals = pair.includes('JPY') ? 3 : 5;
+
+        if (direction === 1) { // BUY
+            slPrice = open - priceChangeSL;
+            tpPrice = open + priceChangeTP;
+        } else { // SELL
+            slPrice = open + priceChangeSL;
+            tpPrice = open - priceChangeTP;
+        }
+
+        elSl.innerText = slPrice.toFixed(decimals);
+        elTp.innerText = tpPrice.toFixed(decimals);
+    }
+
+    // ROBUST MOBILE COPY FUNCTION
+    function handleCopy(valueId, statusId) {
+        const text = document.getElementById(valueId).innerText;
+        if(text === "---") return;
+
+        copyTextToClipboard(text).then(() => {
+            showCopyFeedback(statusId);
+        });
+    }
+
+    function showCopyFeedback(statusId) {
+        const statusEl = document.getElementById(statusId);
+        statusEl.classList.add('visible');
+        setTimeout(() => {
+            statusEl.classList.remove('visible');
+        }, 1500);
+    }
+
+    // This handles both Modern (navigator) and Legacy (execCommand)
+    async function copyTextToClipboard(text) {
+        if ('clipboard' in navigator && navigator.clipboard) {
+            try {
+                await navigator.clipboard.writeText(text);
+                return;
+            } catch (err) {
+                console.error('Navigator Clipboard failed, trying fallback', err);
+            }
+        }
+        
+        // Fallback for older mobile browsers or non-secure contexts
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        
+        // Ensure textarea is not visible but part of DOM
+        textArea.style.position = "fixed";
+        textArea.style.left = "-9999px";
+        textArea.style.top = "0";
+        document.body.appendChild(textArea);
+        
+        textArea.focus();
+        textArea.select();
+        
+        try {
+            document.execCommand('copy');
+        } catch (err) {
+            console.error('Fallback copy failed', err);
+            alert("Could not copy automatically. Please copy manually.");
+        }
+        
+        document.body.removeChild(textArea);
+    }
+</script>
+
+</body>
+</html>
