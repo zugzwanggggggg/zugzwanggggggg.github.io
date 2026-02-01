@@ -19,15 +19,22 @@ createApp({
     },
     computed: {
         calculatedNetPnl() {
-            const raw = this.form.rawPnl || 0;
-            const comm = this.form.comm || 0;
-            return raw - comm;
+            const raw = this.form.rawPnl;
+            const comm = this.form.comm;
+            if (raw === null || raw === "") return 0;
+            return parseFloat(raw) - (parseFloat(comm) || 0);
         },
         totalPnL() {
             return this.trades.reduce((sum, t) => sum + t.netPnl, 0);
         },
         currentBalance() {
             return this.startCapital + this.totalPnL;
+        },
+        sortedTrades() {
+            return [...this.trades].sort((a, b) => new Date(a.date) - new Date(b.date));
+        },
+        displayTrades() {
+            return [...this.sortedTrades].reverse();
         },
         dailyPerformance() {
             const days = {};
@@ -41,143 +48,137 @@ createApp({
             }));
         },
         profitableDaysCount() {
+            // "Profitable Day" must be > 0.5% of starting capital (0.5% of 50k = $250)
             return this.dailyPerformance.filter(d => d.pnl > 250).length;
         },
         nextTradeData() {
-            const history = this.dailyPerformance; 
+            const history = this.sortedTrades; 
             const balance = this.currentBalance;
             const capital = this.startCapital;
 
             // --- CONSTANTS ---
-            const dailyMaxLossCash = capital * (this.dailyLossLimitPercent / 100); // $1000
+            const dailyMaxLossCash = capital * (this.dailyLossLimitPercent / 100); // $1,000
+            const MIN_PROFITABLE_DAYS = 3;
 
-            // --- STATE MACHINE ---
-            let simDay = 1;      
-            let simPath = "FRESH"; 
+            // Targets
+            const D1_TP_TARGET = 4250; 
+            const D1_SL_LIMIT  = -950; 
 
-            // Thresholds
-            const D1_TP_REQ = 4200; 
-            const D1_SL_REQ = -950; // Threshold to consider it a "Full Loss" for the strategy step
-            const D2_WIN_TP_REQ = 350; 
-            const D2_LOSS_TP_REQ = 5000; 
-
-            for (let i = 0; i < history.length; i++) {
-                const pnl = history[i].pnl;
-
-                if (simDay === 1) {
-                    if (pnl >= D1_TP_REQ) {
-                        simDay = 2;
-                        simPath = "WIN_PATH";
-                    } else if (pnl <= D1_SL_REQ) {
-                        simDay = 2;
-                        simPath = "LOSS_PATH";
-                    } else {
-                        // Range Bound -> Reset
-                        simDay = 1;
-                        simPath = "RANGE_RESET";
-                    }
-                }
-                else if (simDay === 2) {
-                    if (simPath === "WIN_PATH") {
-                        if (pnl >= D2_WIN_TP_REQ) {
-                            simDay = 3;
-                            simPath = "WIN_STREAK";
-                        } else {
-                            simDay = 1;
-                            simPath = "RESET";
-                        }
-                    } 
-                    else if (simPath === "LOSS_PATH") {
-                        if (pnl >= D2_LOSS_TP_REQ) {
-                            simDay = 1; 
-                            simPath = "RECOVERED";
-                        } else if (pnl <= D1_SL_REQ) {
-                            simDay = 3; 
-                            simPath = "LOSS_STREAK";
-                        } else {
-                            simDay = 1;
-                            simPath = "RANGE_RESET";
-                        }
-                    }
-                }
-                else if (simDay === 3) {
-                    simDay = 1;
-                    simPath = "RESET";
-                }
-            }
-
-            // --- CALCULATE BASE TARGETS ---
-            let dayLabel = `DAY ${simDay}`;
+            // --- DETERMINE CURRENT DAY ---
+            const dayCount = history.length + 1;
+            let dayLabel = `DAY ${dayCount}`;
+            
             let tpPercent = 0;
-            let slPercent = 2.0; // Default base risk
+            let slPercent = 2.0; 
             let reason = "";
-            let displayPath = simPath === "RANGE_RESET" ? "RANGE DETECTED -> RESET" : simPath;
+            let path = "";
 
-            if (simDay === 1) {
-                tpPercent = 8.5;
-                reason = "AIM FOR SL";
-            }
-            else if (simDay === 2) {
-                if (simPath === "WIN_PATH") {
-                    tpPercent = 0.75;
-                    reason = "DAY 1 TP";
+            // --- CALCULATE ROOM ---
+            const distProfit = Math.max(0, this.targetProfitAmount - balance);
+            const distLoss = Math.max(0, balance - this.targetLossAmount);
+
+            // --- STRATEGY SELECTOR ---
+            
+            // CHECK 1: ARE WE CLOSER TO PROFIT?
+            if (distProfit < distLoss) {
+                // We are in "Profit Territory", BUT have we met the day requirement?
+                const daysCurrent = this.profitableDaysCount;
+
+                if (daysCurrent < MIN_PROFITABLE_DAYS) {
+                    // *** GRIND MODE ***
+                    // We are rich enough, but need more days. 
+                    // Aim for small safe win > $250. Let's do $300 (0.6%) to be safe.
+                    path = "DAY BUILDING";
+                    reason = `NEED ${MIN_PROFITABLE_DAYS - daysCurrent} MORE PROFITABLE DAY(S).`;
+                    tpPercent = 0.6; // $300
                 } else {
-                    tpPercent = 10.5;
-                    reason = "DAY 1 SL";
+                    // *** PROFIT ACCELERATION ***
+                    // We have the money AND the days. Go for the kill.
+                    path = "PROFIT ACCELERATION";
+                    reason = "DAYS MET. AIM FOR FINAL TARGET.";
+                    tpPercent = (distProfit / capital) * 100;
                 }
-            }
-            else if (simDay === 3) {
-                if (simPath === "WIN_STREAK") {
-                    reason = "DAY 2 TP";
-                    const dist = Math.max(0, this.targetProfitAmount - balance);
-                    tpPercent = (dist / capital) * 100;
-                } else {
-                    reason = "DAY 2 SL";
+            } 
+            else {
+                // *** DEFENSIVE / BURST MODE (Aim for SL) ***
+                // Follow the Day-by-Day Logic
+                
+                if (dayCount === 1) {
+                    tpPercent = 8.5;
+                    reason = "AIM FOR SL";
+                    path = "FRESH START";
+                }
+                else if (dayCount === 2) {
+                    const d1 = history[0].netPnl;
+                    if (d1 >= D1_TP_TARGET) {
+                        tpPercent = 0.75;
+                        reason = "DAY 1 TP";
+                        path = "WIN PATH";
+                    } else {
+                        tpPercent = 10.5;
+                        if (d1 <= D1_SL_LIMIT) {
+                             reason = "DAY 1 SL";
+                             path = "LOSS PATH";
+                        } else {
+                             reason = "DAY 1 RANGE"; 
+                             path = "RECOVERY PATH";
+                        }
+                    }
+                }
+                else if (dayCount === 3) {
+                    const d1 = history[0].netPnl;
+                    const d2 = history[1].netPnl;
+                    const d1_Won = d1 >= D1_TP_TARGET;
+                    const d2_Target = d1_Won ? 350 : 5000;
+                    const d2_Won = d2 >= d2_Target;
+
+                    if (d1_Won && d2_Won) {
+                        reason = "DAY 2 TP";
+                        path = "WIN STREAK";
+                        // Even here, check days requirement
+                        if (this.profitableDaysCount < MIN_PROFITABLE_DAYS) {
+                             reason += " (ADD DAY)";
+                             tpPercent = 0.6; // Just get the day
+                        } else {
+                             tpPercent = (distProfit / capital) * 100;
+                        }
+                    } else {
+                        path = "AGGRESSIVE RECOVERY";
+                        tpPercent = 12.5;
+                        if (d2 <= D1_SL_LIMIT) reason = "DAY 2 SL";
+                        else reason = "DAY 2 RANGE";
+                    }
+                }
+                else {
                     tpPercent = 12.5;
+                    reason = "EXTENDED TRADING";
+                    path = "GRINDING";
                 }
             }
 
-            // --- CRITICAL SL ADJUSTMENT ---
-            // 1. Calculate Risk Cap based on Overall Loss ($47,000 Limit)
-            const roomToOverallLoss = Math.max(0, balance - this.targetLossAmount);
-
-            // 2. Calculate Risk Cap based on DAILY Loss ($1,000 Limit)
-            // We look at the LAST DAY in history. If it was negative, we subtract that from today's allowance.
-            // Note: This assumes the next trade is on the SAME day as the last logged trade.
-            // If the last day was positive, full allowance is available.
-            let usedDailyRisk = 0;
-            if (history.length > 0) {
-                const lastDayPnl = history[history.length - 1].pnl;
-                if (lastDayPnl < 0) {
-                    usedDailyRisk = Math.abs(lastDayPnl);
-                }
-            }
-
-            const remainingDailyAllowance = Math.max(0, dailyMaxLossCash - usedDailyRisk);
-
-            // 3. Determine Final Cash Risk
-            // We take the smaller of: Base 2% vs. Overall Room vs. Daily Remaining
-            let finalSlCash = (capital * slPercent) / 100; // The standard $1000
+            // --- RISK MANAGEMENT ---
+            const allowedDailyRisk = dailyMaxLossCash; 
+            let finalSlCash = (capital * 2.0) / 100; 
             
-            // Clamp it
-            finalSlCash = Math.min(finalSlCash, roomToOverallLoss, remainingDailyAllowance);
-            
-            // Recalculate % for display
+            finalSlCash = Math.min(finalSlCash, distLoss, allowedDailyRisk);
             slPercent = (finalSlCash / capital) * 100;
 
-            // Logic Reason Update if clamped
-            if (remainingDailyAllowance < dailyMaxLossCash && remainingDailyAllowance > 0) {
-                reason += " (PARTIAL DAILY RISK LEFT)";
-            } else if (remainingDailyAllowance === 0) {
-                reason = "DAILY STOP LOSS HIT. DO NOT TRADE.";
+            if (distLoss <= 0) {
+                reason = "ACCOUNT MAX LOSS HIT. STOP.";
                 tpPercent = 0;
                 slPercent = 0;
                 finalSlCash = 0;
+            } else if (distProfit <= 0 && this.profitableDaysCount >= MIN_PROFITABLE_DAYS) {
+                reason = "PROFIT TARGET HIT! CHALLENGE PASSED.";
+                tpPercent = 0;
+                slPercent = 0;
+                finalSlCash = 0;
+                path = "COMPLETED";
             }
 
             return {
                 dayLabel,
-                path: displayPath,
+                path,
                 tpPercent: Number(tpPercent).toFixed(2),
                 slPercent: Number(slPercent).toFixed(2),
                 tpCash: (capital * tpPercent) / 100,
@@ -188,15 +189,19 @@ createApp({
     },
     methods: {
         saveTrade() {
-            if (this.form.rawPnl === null) return;
-            const net = this.form.rawPnl - (this.form.comm || 0);
+            if (this.form.rawPnl === null || this.form.rawPnl === "") return;
+            const raw = parseFloat(this.form.rawPnl);
+            const comm = parseFloat(this.form.comm) || 0;
+            const net = raw - comm;
+
             const tradeData = {
                 date: this.form.date,
-                rawPnl: this.form.rawPnl,
-                comm: this.form.comm,
+                rawPnl: raw,
+                comm: comm,
                 netPnl: net,
                 id: Date.now()
             };
+
             if (this.editingIndex !== null) {
                 this.trades[this.editingIndex] = tradeData;
                 this.editingIndex = null;
@@ -206,14 +211,22 @@ createApp({
             this.resetForm();
         },
         deleteTrade(index) {
+            const tradeToDelete = this.displayTrades[index];
+            const realIndex = this.trades.findIndex(t => t.id === tradeToDelete.id);
+            
             if(confirm("DELETE LOG ENTRY?")) {
-                this.trades.splice(index, 1);
-                if (this.editingIndex === index) this.cancelEdit();
+                if (realIndex !== -1) {
+                    this.trades.splice(realIndex, 1);
+                    if (this.editingIndex === realIndex) this.cancelEdit();
+                }
             }
         },
         editTrade(index) {
-            this.editingIndex = index;
-            const t = this.trades[index];
+            const tradeToEdit = this.displayTrades[index];
+            const realIndex = this.trades.findIndex(t => t.id === tradeToEdit.id);
+            
+            this.editingIndex = realIndex;
+            const t = this.trades[realIndex];
             this.form.date = t.date;
             this.form.rawPnl = t.rawPnl;
             this.form.comm = t.comm;

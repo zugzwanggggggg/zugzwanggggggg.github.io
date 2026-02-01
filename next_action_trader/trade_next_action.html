@@ -3,16 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Hedge - Strategic Plan</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Smart Hedge</title>
+    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📈</text></svg>">
+    
     <link rel="stylesheet" href="style.css">
+    
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
-<div id="app" class="app-container">
+<div id="app" class="container">
 
     <div class="panel-left">
         <div class="card" :class="{ 'editing-mode': editingIndex !== null }">
@@ -20,19 +24,21 @@
                 {{ editingIndex !== null ? 'EDIT LOG' : 'TRADE LOGGER' }}
             </h2>
             
-            <form @submit.prevent="saveTrade" class="form-grid">
+            <form @submit.prevent="saveTrade" class="trade-form">
                 
-                <div class="input-group">
+                <div class="form-group">
                     <label>DATE</label>
-                    <input type="date" v-model="form.date" required>
+                    <div class="date-input-wrapper">
+                        <input type="date" v-model="form.date" required>
+                    </div>
                 </div>
 
-                <div class="grid-2">
-                    <div class="input-group">
+                <div class="form-row">
+                    <div class="form-group">
                         <label>RAW P&L ($)</label>
                         <input type="number" step="0.01" v-model.number="form.rawPnl" placeholder="0.00" required>
                     </div>
-                    <div class="input-group">
+                    <div class="form-group">
                         <label>COMMISSION ($)</label>
                         <input type="number" step="0.01" v-model.number="form.comm" placeholder="7.00">
                     </div>
@@ -40,46 +46,46 @@
 
                 <div class="calc-preview">
                     <span>NET P&L:</span>
-                    <span :class="calculatedNetPnl >= 0 ? 'text-green-400' : 'text-red-400'" class="font-bold">
+                    <span :class="calculatedNetPnl >= 0 ? 'text-success' : 'text-danger'">
                         {{ formatCurrency(calculatedNetPnl) }}
                     </span>
                 </div>
 
-                <div class="flex gap-2">
-                    <button type="submit" class="btn-submit" :class="editingIndex !== null ? 'bg-orange-500 hover:bg-orange-600' : 'bg-blue-600 hover:bg-blue-700'">
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary" :class="{ 'btn-warning': editingIndex !== null }">
                         {{ editingIndex !== null ? 'UPDATE LOG' : 'LOG TRADE' }}
                     </button>
                     
-                    <button v-if="editingIndex !== null" @click="cancelEdit" type="button" class="btn-cancel">
+                    <button v-if="editingIndex !== null" @click="cancelEdit" type="button" class="btn btn-secondary">
                         CANCEL
                     </button>
                 </div>
             </form>
         </div>
 
-        <div class="card log-history">
-            <h3>TRADE HISTORY</h3>
+        <div class="card log-history-card">
+            <h3 class="card-subtitle">TRADE HISTORY</h3>
             <div class="log-list">
                 <div v-if="trades.length === 0" class="empty-state">NO TRADES LOGGED</div>
                 
-                <div v-for="(trade, index) in trades.slice().reverse()" :key="trade.id" class="log-item">
+                <div v-for="(trade, index) in displayTrades" :key="trade.id" class="log-item">
                     <div class="log-info">
-                        <div class="date">{{ trade.date }}</div>
-                        <div class="text-xs text-slate-500">
+                        <div class="log-date">{{ trade.date }}</div>
+                        <div class="log-meta">
                             RAW: {{ trade.rawPnl }} | COMM: -{{ trade.comm }}
                         </div>
                     </div>
 
-                    <div class="flex items-center gap-4">
-                        <div :class="trade.netPnl >= 0 ? 'text-green-400' : 'text-red-400'" class="pnl text-lg">
+                    <div class="log-right">
+                        <div :class="trade.netPnl >= 0 ? 'text-success' : 'text-danger'" class="log-pnl">
                             {{ formatCurrency(trade.netPnl) }}
                         </div>
                         
                         <div class="action-buttons">
-                            <button @click="editTrade(trades.length - 1 - index)" class="text-slate-400 hover:text-blue-400">
+                            <button @click="editTrade(index)" class="icon-btn edit">
                                 <i class="fas fa-pen"></i>
                             </button>
-                            <button @click="deleteTrade(trades.length - 1 - index)" class="text-slate-400 hover:text-red-400">
+                            <button @click="deleteTrade(index)" class="icon-btn delete">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
@@ -95,33 +101,33 @@
             <div class="card stat-card">
                 <div class="stat-label">CURRENT BALANCE</div>
                 <div class="stat-value">{{ formatCurrency(currentBalance) }}</div>
-                <div class="stat-sub" :class="totalPnL >= 0 ? 'text-green-400' : 'text-red-400'">
+                <div class="stat-sub" :class="totalPnL >= 0 ? 'text-success' : 'text-danger'">
                     {{ totalPnL >= 0 ? '+' : '' }}{{ formatCurrency(totalPnL) }}
                 </div>
             </div>
 
             <div class="card stat-card">
-                <div class="flex justify-between">
-                    <div class="stat-label text-blue-400">TARGET PROFIT (10%)</div>
+                <div class="stat-header">
+                    <div class="stat-label text-blue">TARGET PROFIT (10%)</div>
                     <div class="stat-label">$55,000</div>
                 </div>
-                <div class="progress-bar-bg">
-                    <div class="progress-bar-fill blue" :style="{ width: Math.max(0, Math.min((totalPnL / 5000) * 100, 100)) + '%' }"></div>
+                <div class="progress-track">
+                    <div class="progress-fill fill-blue" :style="{ width: Math.max(0, Math.min((totalPnL / 5000) * 100, 100)) + '%' }"></div>
                 </div>
-                <div class="stat-footer text-blue-400">
+                <div class="stat-footer text-blue">
                     {{ Math.max(0, ((totalPnL / 5000) * 100)).toFixed(1) }}% ACHIEVED
                 </div>
             </div>
 
             <div class="card stat-card">
-                <div class="flex justify-between">
-                    <div class="stat-label text-red-400">MAX LOSS (6%)</div>
+                <div class="stat-header">
+                    <div class="stat-label text-danger">MAX LOSS (6%)</div>
                     <div class="stat-label">$47,000</div>
                 </div>
-                <div class="progress-bar-bg">
-                    <div class="progress-bar-fill red" :style="{ width: Math.min((Math.max(0, 50000 - currentBalance) / 3000) * 100, 100) + '%' }"></div>
+                <div class="progress-track">
+                    <div class="progress-fill fill-red" :style="{ width: Math.min((Math.max(0, 50000 - currentBalance) / 3000) * 100, 100) + '%' }"></div>
                 </div>
-                <div class="stat-footer text-red-400">
+                <div class="stat-footer text-danger">
                     {{ formatCurrency(Math.max(0, 50000 - currentBalance)) }} / $3,000 USED
                 </div>
             </div>
@@ -129,59 +135,59 @@
 
         <div class="card recommendation-card">
             <div class="rec-header">
-                <div>
-                    <h2 class="text-2xl font-bold flex items-center gap-2">
-                        STRATEGY PLAN
-                    </h2>
-                    <p class="text-sm text-slate-400 uppercase tracking-widest">SMART HEDGE LOGIC</p>
+                <div class="rec-title-group">
+                    <h2 class="rec-title">STRATEGY PLAN</h2>
+                    <p class="rec-subtitle">
+                        PLANNING FOR: <span class="text-white">{{ form.date }}</span>
+                    </p>
                 </div>
-                <div class="text-right">
-                    <div class="text-sm text-slate-400">PHASE</div>
-                    <div class="text-xl font-bold text-blue-400 uppercase">{{ nextTradeData.dayLabel }}</div>
+                <div class="rec-phase">
+                    <span class="rec-label">PHASE</span>
+                    <span class="rec-value text-blue">{{ nextTradeData.dayLabel }}</span>
                 </div>
             </div>
 
             <div class="rec-body">
                 <div class="rec-visual">
-                    <div class="text-xs text-slate-500 mb-2 font-mono border-b border-slate-700 pb-2">PATH: {{ nextTradeData.path }}</div>
-                    <div class="text-lg font-bold mb-1 text-slate-300">ACTION</div>
-                    <p class="text-sm text-white uppercase font-bold">{{ nextTradeData.logicReason }}</p>
+                    <div class="visual-context">CONTEXT: {{ nextTradeData.path }}</div>
+                    <div class="visual-label">STATUS</div>
+                    <div class="visual-reason">{{ nextTradeData.logicReason }}</div>
                 </div>
                 
                 <div class="rec-numbers">
-                    <div class="number-row tp">
-                        <span class="label">TARGET PROFIT (TP)</span>
-                        <div class="values">
-                            <div class="percent text-green-400">{{ nextTradeData.tpPercent }}%</div>
-                            <div class="cash text-green-300">{{ formatCurrency(nextTradeData.tpCash) }}</div>
+                    <div class="number-row tp-row">
+                        <span class="nr-label">TARGET PROFIT (TP)</span>
+                        <div class="nr-values">
+                            <div class="nr-percent text-success">{{ nextTradeData.tpPercent }}%</div>
+                            <div class="nr-cash">{{ formatCurrency(nextTradeData.tpCash) }}</div>
                         </div>
                     </div>
                     
-                    <div class="number-row sl">
-                        <span class="label">STOP LOSS (SL)</span>
-                        <div class="values">
-                            <div class="percent text-red-400">{{ nextTradeData.slPercent }}%</div>
-                            <div class="cash text-red-300">{{ formatCurrency(nextTradeData.slCash) }}</div>
+                    <div class="number-row sl-row">
+                        <span class="nr-label">STOP LOSS (SL)</span>
+                        <div class="nr-values">
+                            <div class="nr-percent text-danger">{{ nextTradeData.slPercent }}%</div>
+                            <div class="nr-cash">{{ formatCurrency(nextTradeData.slCash) }}</div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="grid-2">
-             <div class="card">
-                <div class="stat-label mb-2">PROFITABLE DAYS (>0.5%)</div>
-                <div class="flex items-baseline gap-2">
-                    <span class="text-3xl font-bold text-green-400">{{ profitableDaysCount }}</span>
-                    <span class="text-slate-500 font-bold">/ 3</span>
+        <div class="metrics-row">
+             <div class="card metric-card">
+                <div class="stat-label">PROFITABLE DAYS (>0.5%)</div>
+                <div class="metric-big">
+                    <span class="text-success">{{ profitableDaysCount }}</span>
+                    <span class="text-muted">/ 3</span>
                 </div>
             </div>
-            <div class="card opacity-75">
-                <div class="stat-label mb-2">PREVIOUS DAY P&L</div>
-                <div v-if="dailyPerformance.length > 0" class="text-lg font-mono" :class="dailyPerformance[dailyPerformance.length-1].pnl >= 0 ? 'text-green-400' : 'text-red-400'">
+            <div class="card metric-card opacity-card">
+                <div class="stat-label">PREVIOUS DAY P&L</div>
+                <div v-if="dailyPerformance.length > 0" class="metric-value" :class="dailyPerformance[dailyPerformance.length-1].pnl >= 0 ? 'text-success' : 'text-danger'">
                     {{ formatCurrency(dailyPerformance[dailyPerformance.length-1].pnl) }}
                 </div>
-                <div v-else class="text-sm text-slate-500 italic">NO HISTORY</div>
+                <div v-else class="metric-empty">NO HISTORY</div>
             </div>
         </div>
     </div>
