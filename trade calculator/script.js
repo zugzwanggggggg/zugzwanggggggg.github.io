@@ -5,17 +5,20 @@ let direction = 1; // 1 for Buy, -1 for Sell
 const inputs = document.querySelectorAll('input, select');
 const elSl = document.getElementById('slResult');
 const elTp = document.getElementById('tpResult');
-const elSlPips = document.getElementById('slPips'); // NEW
-const elTpPips = document.getElementById('tpPips'); // NEW
+const elSlPips = document.getElementById('slPips');
+const elTpPips = document.getElementById('tpPips');
 const elPair = document.getElementById('pairSelect');
 const elLot = document.getElementById('lotSize');
+const elBalance = document.getElementById('accountBalance');
 
 // Load saved settings
 if(localStorage.getItem('fk_last_lot')) elLot.value = localStorage.getItem('fk_last_lot');
 if(localStorage.getItem('fk_last_pair')) elPair.value = localStorage.getItem('fk_last_pair');
+if(localStorage.getItem('fk_last_balance')) elBalance.value = localStorage.getItem('fk_last_balance'); // Load Balance
 
 // Listeners
 inputs.forEach(input => input.addEventListener('input', calculate));
+
 elPair.addEventListener('change', () => {
     localStorage.setItem('fk_last_pair', elPair.value);
     calculate();
@@ -24,6 +27,11 @@ elLot.addEventListener('change', () => {
     localStorage.setItem('fk_last_lot', elLot.value);
     calculate();
 });
+elBalance.addEventListener('change', () => {
+    localStorage.setItem('fk_last_balance', elBalance.value);
+    calculate();
+});
+
 
 // Toggle Tooltip
 function toggleTooltip(el) {
@@ -46,25 +54,26 @@ function setDirection(dir) {
 }
 
 function calculate() {
+    const balance = parseFloat(document.getElementById('accountBalance').value);
     const lots = parseFloat(document.getElementById('lotSize').value);
     const risk = parseFloat(document.getElementById('riskAmount').value);
     const reward = parseFloat(document.getElementById('rewardAmount').value);
     const open = parseFloat(document.getElementById('openPrice').value);
     const pair = document.getElementById('pairSelect').value;
 
-    if (!lots || !risk || !reward || !open) {
+    if (!lots || !risk || !reward || !open || !balance) {
         elSl.innerText = "---";
         elTp.innerText = "---";
-        elSlPips.innerText = "0.0 pips";
-        elTpPips.innerText = "0.0 pips";
+        elSlPips.innerText = "";
+        elTpPips.innerText = "";
         return;
     }
 
+    // --- Price Calculation ---
     let priceChangeSL = 0;
     let priceChangeTP = 0;
     const quoteIsUSD = ['EURUSD','GBPUSD','AUDUSD','NZDUSD'].includes(pair);
     
-    // Calculate raw price movement needed
     if (quoteIsUSD) {
         priceChangeSL = risk / (lots * 100000);
         priceChangeTP = reward / (lots * 100000);
@@ -73,7 +82,7 @@ function calculate() {
         priceChangeTP = (reward * open) / (lots * 100000);
     }
 
-    // Determine Pip Size (0.01 for JPY, 0.0001 for others)
+    // Determine Pip Size
     const isJpy = pair.includes('JPY');
     const pipSize = isJpy ? 0.01 : 0.0001;
     const decimals = isJpy ? 3 : 5;
@@ -89,17 +98,23 @@ function calculate() {
         tpPrice = open - priceChangeTP;
     }
 
-    // Calculate Pip Count
+    // --- Pip Count Calculation ---
     const pipsSL = priceChangeSL / pipSize;
     const pipsTP = priceChangeTP / pipSize;
+
+    // --- Percentage Calculation ---
+    // % = (Amount / Starting Capital) * 100
+    const percentRisk = (risk / balance) * 100;
+    const percentReward = (reward / balance) * 100;
 
     // Update DOM
     elSl.innerText = slPrice.toFixed(decimals);
     elTp.innerText = tpPrice.toFixed(decimals);
     
-    // Update Pip display
-    elSlPips.innerText = pipsSL.toFixed(1) + " pips";
-    elTpPips.innerText = pipsTP.toFixed(1) + " pips";
+    // Format: "10.0 pips (1.2%)"
+    // Use HTML to color the percentage slightly differently if desired, or keep plain text
+    elSlPips.innerHTML = `${pipsSL.toFixed(1)} pips <span style="opacity:0.7">(${percentRisk.toFixed(2)}%)</span>`;
+    elTpPips.innerHTML = `${pipsTP.toFixed(1)} pips <span style="opacity:0.7">(${percentReward.toFixed(2)}%)</span>`;
 }
 
 function handleCopy(valueId, statusId) {

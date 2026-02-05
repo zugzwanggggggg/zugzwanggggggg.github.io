@@ -84,14 +84,19 @@ createApp({
                 // We are in "Profit Territory", BUT have we met the day requirement?
                 const daysCurrent = this.profitableDaysCount;
 
-                if (daysCurrent < MIN_PROFITABLE_DAYS) {
+                if ((daysCurrent < MIN_PROFITABLE_DAYS) & ((this.targetProfitAmount - balance) < 500)) {
                     // *** GRIND MODE ***
                     // We are rich enough, but need more days. 
-                    // Aim for small safe win > $250. Let's do $300 (0.6%) to be safe.
                     path = "DAY BUILDING";
                     reason = `NEED ${MIN_PROFITABLE_DAYS - daysCurrent} MORE PROFITABLE DAY(S).`;
-                    tpPercent = 0.6; // $300
-                } else {
+                    tpPercent = 0.5;
+                } else if ((daysCurrent < MIN_PROFITABLE_DAYS) & (balance < this.targetProfitAmount)) {
+                    // TP first day, normal profit path
+                    path = "DAY BUILDING - NORMAL PATH";
+                    reason = `NEED ${MIN_PROFITABLE_DAYS - daysCurrent} MORE PROFITABLE DAY(S).`;
+                    tpPercent = 0.75; 
+                } 
+                else {
                     // *** PROFIT ACCELERATION ***
                     // We have the money AND the days. Go for the kill.
                     path = "PROFIT ACCELERATION";
@@ -100,7 +105,7 @@ createApp({
                 }
             } 
             else {
-                // *** DEFENSIVE / BURST MODE (Aim for SL) ***
+                // Aim for SL
                 // Follow the Day-by-Day Logic
                 
                 if (dayCount === 1) {
@@ -138,7 +143,7 @@ createApp({
                         // Even here, check days requirement
                         if (this.profitableDaysCount < MIN_PROFITABLE_DAYS) {
                              reason += " (ADD DAY)";
-                             tpPercent = 0.6; // Just get the day
+                             tpPercent = 0.75; // <--- UPDATED TO 0.75
                         } else {
                              tpPercent = (distProfit / capital) * 100;
                         }
@@ -241,6 +246,12 @@ createApp({
         },
         formatCurrency(val) {
             return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
+        },
+        goToNextDay() {
+            const d = new Date(this.form.date);
+            d.setDate(d.getDate() + 1);
+            this.form.date = d.toISOString().split('T')[0];
+            this.resetForm();
         }
     }
 }).mount('#app');
