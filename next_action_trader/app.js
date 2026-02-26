@@ -61,7 +61,7 @@ createApp({
             const MIN_PROFITABLE_DAYS = 3;
 
             // Targets
-            const D1_TP_TARGET = 4250; 
+            const D1_TP_TARGET = 4400; //8.8% of 5000
             const D1_SL_LIMIT  = -950; 
 
             // --- DETERMINE CURRENT DAY ---
@@ -69,7 +69,7 @@ createApp({
             let dayLabel = `DAY ${dayCount}`;
             
             let tpPercent = 0;
-            let slPercent = 2.0; 
+            let slPercent = 1.9; 
             let reason = "";
             let path = "";
 
@@ -89,12 +89,12 @@ createApp({
                     // We are rich enough, but need more days. 
                     path = "DAY BUILDING";
                     reason = `NEED ${MIN_PROFITABLE_DAYS - daysCurrent} MORE PROFITABLE DAY(S).`;
-                    tpPercent = 0.5;
+                    tpPercent = 0.56; // took into consideration commission
                 } else if ((daysCurrent < MIN_PROFITABLE_DAYS) & (balance < this.targetProfitAmount)) {
                     // TP first day, normal profit path
                     path = "DAY BUILDING - NORMAL PATH";
                     reason = `NEED ${MIN_PROFITABLE_DAYS - daysCurrent} MORE PROFITABLE DAY(S).`;
-                    tpPercent = 0.75; 
+                    tpPercent = 0.6; 
                 } 
                 else {
                     // *** PROFIT ACCELERATION ***
@@ -109,18 +109,18 @@ createApp({
                 // Follow the Day-by-Day Logic
                 
                 if (dayCount === 1) {
-                    tpPercent = 8.5;
+                    tpPercent = 8.8;
                     reason = "AIM FOR SL";
                     path = "FRESH START";
                 }
                 else if (dayCount === 2) {
                     const d1 = history[0].netPnl;
                     if (d1 >= D1_TP_TARGET) {
-                        tpPercent = 0.75;
+                        tpPercent = 0.6;
                         reason = "DAY 1 TP";
                         path = "WIN PATH";
-                    } else {
-                        tpPercent = 10.5;
+                    } else { //d1 is PNL for day 1, in this case it is -950
+                        tpPercent = (((0.88 * 5000) - d1)/5000) * 10;
                         if (d1 <= D1_SL_LIMIT) {
                              reason = "DAY 1 SL";
                              path = "LOSS PATH";
@@ -134,7 +134,7 @@ createApp({
                     const d1 = history[0].netPnl;
                     const d2 = history[1].netPnl;
                     const d1_Won = d1 >= D1_TP_TARGET;
-                    const d2_Target = d1_Won ? 350 : 5000;
+                    const d2_Target = d1_Won ? 300 : 5000;
                     const d2_Won = d2 >= d2_Target;
 
                     if (d1_Won && d2_Won) {
@@ -143,13 +143,13 @@ createApp({
                         // Even here, check days requirement
                         if (this.profitableDaysCount < MIN_PROFITABLE_DAYS) {
                              reason += " (ADD DAY)";
-                             tpPercent = 0.75; // <--- UPDATED TO 0.75
+                             tpPercent = 0.12; 
                         } else {
                              tpPercent = (distProfit / capital) * 100;
                         }
-                    } else {
+                    } else { //if day 1 and day 2 both lose: d1 = -950, d2 = -950
                         path = "AGGRESSIVE RECOVERY";
-                        tpPercent = 12.5;
+                        tpPercent = (((0.88 * 5000) - (d1 + d2))/5000) * 10;
                         if (d2 <= D1_SL_LIMIT) reason = "DAY 2 SL";
                         else reason = "DAY 2 RANGE";
                     }
@@ -163,7 +163,7 @@ createApp({
 
             // --- RISK MANAGEMENT ---
             const allowedDailyRisk = dailyMaxLossCash; 
-            let finalSlCash = (capital * 2.0) / 100; 
+            let finalSlCash = (capital * 1.9) / 100; 
             
             finalSlCash = Math.min(finalSlCash, distLoss, allowedDailyRisk);
             slPercent = (finalSlCash / capital) * 100;
